@@ -75,7 +75,7 @@ public class LineCounterTest
     {
         var sut = new LineCounter();
 
-        sut.Enumerating(sut => sut.ApplyToDirectory(Path.GetTempFileName())).Should().Throw<DirectoryNotFoundException>();
+        sut.Enumerating(sut => sut.ApplyToDirectory(Path.GetTempFileName())).Should().Throw<IOException>();
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public class LineCounterTest
     {
         var sut = new LineCounter();
 
-        sut.Enumerating(sut => sut.ApplyToDirectory(Path.GetTempFileName())).Should().Throw<DirectoryNotFoundException>();
+        sut.Enumerating(sut => sut.ApplyToDirectory(Path.GetTempFileName())).Should().Throw<IOException>();
     }
 
     /// <summary>
