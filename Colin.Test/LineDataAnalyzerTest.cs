@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Colin.Test;
 
-public class LineCounterTest
+public class LineDataAnalyzerTest
 {
     const int numberOfFiles = 2;
     const int numberOfLines = 10;
@@ -17,7 +17,7 @@ public class LineCounterTest
     [InlineData(10)]
     public void ApplyTo_File_ReturnsCorrectLineCount(int lineCount)
     {
-        var sut = new LineCounter();
+        var sut = new LineDataAnalyzer();
         var path = Path.GetTempFileName();
         var lines = new string[lineCount];
         Array.Fill(lines, "a");
@@ -25,24 +25,35 @@ public class LineCounterTest
 
         var result = sut.ApplyTo(path);
 
-        result.Should().Be(lineCount);
+        result.AllLines.Count.Should().Be(lineCount);
     }
 
     [Fact]
     public void ApplyTo_Directory_AggregatesNestedLineCount()
     {
-        var sut = new LineCounter();
+        var sut = new LineDataAnalyzer();
         var directoryPath = CreateTestingSystemEntries(numberOfLines);
 
         var result = sut.ApplyTo(directoryPath);
 
-        result.Should().Be(numberOfLines * numberOfFiles);
+        result.AllLines.Count.Should().Be(numberOfLines * numberOfFiles);
+    }
+
+    [Fact]
+    public void ApplyTo_Directory_ReturnsCorrectEntryName()
+    {
+        var sut = new LineDataAnalyzer();
+        var directoryName = CreateTestingSystemEntries(numberOfLines);
+
+        var result = sut.ApplyTo(directoryName);
+
+        result.EntryName.Should().Be(directoryName);
     }
 
     [Fact]
     public void ApplyTo_NonExistentFileSystemEntry_Throws()
     {
-        var sut = new LineCounter();
+        var sut = new LineDataAnalyzer();
 
         sut.Invoking(sut => sut.ApplyTo(string.Empty)).Should().Throw<FileNotFoundException>();
     }
@@ -50,19 +61,19 @@ public class LineCounterTest
     [Fact]
     public void ApplyToDirectory_TopDirectoryOnly_AggregatesNestedLineCount()
     {
-        var sut = new LineCounter();
+        var sut = new LineDataAnalyzer();
 
         var path = CreateTestingSystemEntries(numberOfLines);
 
         var result = sut.ApplyToDirectory(path, SearchOption.TopDirectoryOnly);
 
-        result.First().Should().Be(numberOfLines * numberOfFiles);
+        result.First().AllLines.Count.Should().Be(numberOfLines * numberOfFiles);
     }
 
     [Fact]
     public void ApplyToDirectory_AllDirectories_DoesNotAggregateNestedLineCount()
     {
-        var sut = new LineCounter();
+        var sut = new LineDataAnalyzer();
         var path = CreateTestingSystemEntries(numberOfLines);
 
         var result = sut.ApplyToDirectory(path);
@@ -73,7 +84,7 @@ public class LineCounterTest
     [Fact]
     public void ApplyToDirectory_NonExistentPath_Throws()
     {
-        var sut = new LineCounter();
+        var sut = new LineDataAnalyzer();
 
         sut.Enumerating(sut => sut.ApplyToDirectory(Path.GetTempFileName())).Should().Throw<IOException>();
     }
@@ -81,7 +92,7 @@ public class LineCounterTest
     [Fact]
     public void ApplyToDirectory_FilePath_Throws()
     {
-        var sut = new LineCounter();
+        var sut = new LineDataAnalyzer();
 
         sut.Enumerating(sut => sut.ApplyToDirectory(Path.GetTempFileName())).Should().Throw<IOException>();
     }
